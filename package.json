@@ -22,7 +22,7 @@
     "lerp",
     "curve"
   ],
-  "author": "samuelpetersson",
+  "author": "Samuel Petersson <samuelpetersson@pm.me>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/samuelpetersson/animate/issues"
