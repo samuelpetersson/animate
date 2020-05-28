@@ -1,0 +1,31 @@
+{
+  "name": "animate",
+  "version": "0.5.0",
+  "description": "Animate JavaScript",
+  "main": "./src/animate.js",
+  "exports": {
+    ".": "./src/animate.js",
+    "./curve": "./src/curve.js",
+    "./lerp": "./src/lerp.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samuelpetersson/animate.git"
+  },
+  "keywords": [
+    "animate",
+    "tween",
+    "async",
+    "lerp",
+    "curve"
+  ],
+  "author": "samuelpetersson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/samuelpetersson/animate/issues"
+  },
+  "homepage": "https://github.com/samuelpetersson/animate#readme"
+}
