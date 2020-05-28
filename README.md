@@ -1,4 +1,3 @@
-# Animate
 
 Animate helps writing animated async functions in a controllable context.
 
