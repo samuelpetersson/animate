@@ -3,10 +3,6 @@
 <head>
 	<meta charset="UTF-8">
 	<title>animate - tween</title>
-	<script src="../src/animate.js"></script>
-	<script src="../src/curve.js"></script>
-	<script src="../src/lerp.js"></script>
-
 	<style>
 			html, body {
 				height: 100%;
@@ -23,14 +19,13 @@
 </head>
 <body>
 	
-
 	<div id="bar1"></div>
 	<div id="bar2"></div>
 	<div id="bar3"></div>	
 	<div id="bar4"></div>	
-
-	<script>
-
+	
+	<script type="module">
+  	import animate, {curve, lerp} from '../src/animate.js'
 	
 		var bar1 = document.getElementById('bar1')
 		var bar2 = document.getElementById('bar2')

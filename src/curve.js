@@ -1,35 +1,21 @@
-var curve = (function() {
+export function smoothstep(t) {
+	return t * t * (3 - 2 * t)
+}
 
-	return {
+export function smootherstep(t) {
+	return t * t * t * (t * (t * 6 - 15) + 10)
+}
 
-		smoothstep: function(t) {
-			return t * t * (3 - 2 * t)
-		},
+export function powerIn(exp) {
+	return function(t) { return Math.pow(t, exp) }
+}
 
-		smootherstep: function(t) {
-			return t * t * t * (t * (t * 6 - 15) + 10)
-		},
+export function powerOut(exp) {
+	return function(t) { return 1 - Math.pow(1 - t, exp) }
+}
 
-		powerIn: function(exp) {
-			return function(t) { return Math.pow(t, exp) }
-		},
-
-		powerOut: function(exp) {
-			return function(t) { return 1 - Math.pow(1 - t, exp) }
-		},
-
-		powerInOut: function(exp) {
-    	return function(t) { 
-    		return t < 0.5 ? Math.pow(t * 2, exp) * 0.5 : 1 - Math.pow(2 - t * 2, exp) * 0.5
-    	}
-		}
-
-		//TODO: cubic-bezier()
+export function powerInOut(exp) {
+	return function(t) { 
+		return t < 0.5 ? Math.pow(t * 2, exp) * 0.5 : 1 - Math.pow(2 - t * 2, exp) * 0.5
 	}
-
-})()
-
-
-if(typeof module !== "undefined") {
-  module.exports = curve
 }

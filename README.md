@@ -1,151 +1,82 @@
+# Animate
 
-Animate helps writing animated async functions in a controllable context.
+Animate async functions in controllable scopes. 
 
-**Demos**
-
-[tween](./demos/tween.html)
+Examples: [tween](https://samuelpetersson.github.io/animate/examples/tween.html), [fixed](https://samuelpetersson.github.io/animate/examples/fixed.html)
 
 
-### Concept
+## Install
 
-**until**
+`npm install @samuelpetersson/animate`
 
-`animate.until` takes a function as argument which will be called every animation frame *until* it returns true:
-
-```javascript
-animate.until(dt => /*runs until we return true*/)
-```
-
-It uses promises which keeps our animation sequences manageable and flat:
+## Usage
 
 ```javascript
-await animate.until(...
-await animate.every([
-	animate.until(...
-	animate.until(...
-])
-console.log('done!')
-```
+import animate, {lerp, curve} from '@samuelpetersson/animate'
 
-Using the `until` function we can write a delay function:
+//Tween background color
+await animate.tween({duration: 2}, (f) => {
+  document.body.style.backgroundColor = '#' + lerp.color(0xffffff, 0xff0099, f).toString(16)
+})
 
-```javascript
-var time = 0
-await animate.until(dt => (time += dt) >= 2)
-console.log('2 seconds delay done!')
-```
+//Wait 1 second...
+await animate.delay(1)
 
-This example is actually already implemented as the delay function: `await animate.delay(2)`
-
-**tween**
-
-Another function based on `until` is `tween`. Interpolate be*tween* two values over time:
-
-```javascript
-animate.tween({duration:2, curve:smoothstep}, (v) => console.log('current tween value:', v))
-```
-
-**scope**
-
-The `animate` object is a context aware scope, which we can use to control our animations with:
-
-```javascript
 //Bullet time!
 animate.scale = 0.1
 
-//Clear all
+//Tween myElement width and height
+await animate.tween({duration: 2, curve: curve.smoothstep}, (f) => {
+  myElement.style.width = lerp.float(100, 0, f) + '%'
+  myElement.style.height = lerp.float(50, 400, f) + 'px'
+})
+
+//Stop all animations created in the animate scope
 animate.clear()
+
+//Create a new scope
+var animate2 = animate.scope()
 ```
 
-Usually we need to control a subset of animations so we use `animate.scope` to create a new animate object:
+## Reference
 
+**Animate**
 
-```javascript
-var group = animate.scope()
+- `pause:boolean` Indicates whether the scope is paused or not.
 
-group.tween(...
-group.tween(...
+- `scale:number` Delta time multiplier. (use this to speed up or slow down an entire scope)
 
-//Clear only this group
-group.clear()
+- `scope(scale:number = 1):Animate` Returns a new animate scope.	
 
-```
-
-
-### Reference
-
-**animate (scope)**
-
-- `pause` Boolean indicates whether the scope is paused or not.
-- `scale` A number which will be multiplied with delta time. (use this to speed up or slow down an entire scope)
-- `scope(scale)` Returns a new animate scope. The scale argument is optional (Defaults to 1).	
 - `clear()` Clear all animations in current scope.
-- `until(solve)` Resolves when the solve function returns true. 
-- `every(items)` Resolves when all promises in the items array has resolved. 
-- `delay(duration)` Resolves when the accumulated time has reached `duration`.
-- `tween({duration, curve}, interp)` Runs `interp` with the accumulated time normalized (0 to 1). `duration` specifies the time scale. `curve` specifies a function to ease the normalized value.
-- `fixed({fps, max}, update, render)` Runs `update` with a fixed delta time and `render` with the progress in the last time step.
+
+- `until(solve:(deltaTime:number) => boolean):Promise` Resolves when the solve function returns true. 
+
+- `every(items:Promise[]):Promise` Resolves when all promises in the items array has resolved. 
+
+- `delay(duration:number):Promise` Resolves when the accumulated time has reached `duration`.
+
+- `tween({duration:number, curve:(t:number) => number}, interp:(f:number) => void):Promise` Runs `interp` with the accumulated time normalized (0 to 1). `duration` specifies duration in seconds. `curve` specifies a function to ease the normalized value.
+
+- `fixed({fps:number, max:number}, update:(fixedDeltaTime:number) => boolean, render:(progress:number) => void)` Runs `update` with a fixed delta time and `render` with the progress in the last time step. `fps` specifies update frames per seconds. `max` specifies an update limit.
 
 
-**animate/curve**
+**curve**
 
-- `smoothstep`
-- `smootherstep`
-- `powerIn(exp)`
-- `powerOut(exp)`
-- `powerInOut(exp)`
-
-
-**animate/lerp**
-
-- `float(a, b, t)` Calculates float between a and b.
-- `color(a, b, t)` Calculates color between a and b.
-- `angle(a, b, t)` Calculates angle between a and b.
+- `smoothstep(t:number) => number`
+- `smootherstep(t:number) => number`
+- `powerIn(exp):(t:number) => number`
+- `powerOut(exp):(t:number) => number`
+- `powerInOut(exp):(t:number) => number`
 
 
-### To do
+**lerp**
 
-**animate/interp**
-
-- `style(source, target)` Returns a new interpolation function for dom element style.
-
-- *Maybe add:* `animate.style({duration, curve}, element, {width:40, color:0xff0099})`
+- `float(a:number, b:number, t:number):number` Returns float between a and b.
+- `color(a:number, b:number, t:number):number` Returns color between a and b.
+- `angle(a:number, b:number, t:number):number` Returns angle between a and b.
 
 
+**interp**
 
-### Examples
-
-**Tween sequence**
-```javascript
-var {tween, delay} = animate.scope()
-
-await tween({duration: 2}, (f) => {
-	document.body.style.backgroundColor = '#' + lerp.color(0xffffff, 0xff0099, f).toString(16)
-})
-
-await delay(1)
-
-await tween({duration: 2, curve.powerInOut(2)}, (f) => {
-	element.style.width = lerp.float(0, 100, f) + '%'
-	element.style.height = lerp.float(0, 100, f) + '%'
-})
-```
-
-
-**Simulate**
-```javascript
-var update = function(dt) {
-	prevState = nextState
-	integrate(nextState, dt)
-}
-
-var render = function(f) {
-	currentState = lerp(prevState, nextState, f)
-}
-
-animate.fixed({fps:60}, update, render)
-```
-
-
-
-
+- `style(source, target)` Returns a new interpolation function for dom element style. **Not yet implemented!**

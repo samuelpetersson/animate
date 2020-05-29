@@ -1,14 +1,11 @@
 {
   "name": "@samuelpetersson/animate",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Animate JavaScript",
   "main": "./src/animate.js",
-  "exports": {
-    ".": "./src/animate.js",
-    "./curve": "./src/curve.js",
-    "./lerp": "./src/lerp.js"
-  },
+  "type": "module",
   "scripts": {
+    "serve": "npx serve ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

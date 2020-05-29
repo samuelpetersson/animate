@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>animate - fixed</title>
+	<style>
+		html, body {
+		  margin: 0;
+		  height: 100%;
+		}
+		canvas {
+		  display: block;
+		}
+	</style>
+</head>
+<body>
+
+	<script type="module">
+  	import animate, {lerp} from '../src/animate.js'
+	
+		var rk4 = function(state, evaluate) {
+
+	    var ktp = [], ktv = []
+	    var k1p = [], k1v = []
+	    var k2p = [], k2v = []
+	    var k3p = [], k3v = []
+	    var k4p = [], k4v = []
+
+
+			return function(dt) {
+					
+				var pos = state.pos
+				var vel = state.vel
+
+	      var i, l = vel.length
+
+	      i = -1
+	      while(++i < l) {
+	        k1p[i] = vel[i]
+	        k1v[i] = 0
+	      }
+
+	      evaluate(pos, vel, k1v)
+	      
+	      i = -1
+	      while(++i < l) {
+	        ktp[i] = pos[i] + k1p[i] * dt * 0.5
+	        ktv[i] = vel[i] + k1v[i] * dt * 0.5
+	        
+	        k2p[i] = ktv[i]
+	        k2v[i] = 0
+	      }
+
+	      evaluate(ktp, ktv, k2v)
+	      
+	      i = -1
+	      while(++i < l) {
+	        ktp[i] = pos[i] + k2p[i] * dt * 0.5
+	        ktv[i] = vel[i] + k2v[i] * dt * 0.5
+
+	        k3p[i] = ktv[i]
+	        k3v[i] = 0
+	      }
+
+	      evaluate(ktp, ktv, k3v)
+	      
+	      i = -1
+	      while(++i < l) {
+	        ktp[i] = pos[i] + k3p[i] * dt
+	        ktv[i] = vel[i] + k3v[i] * dt
+
+	        k4p[i] = ktv[i]
+	        k4v[i] = 0
+	      }
+
+	      evaluate(ktp, ktv, k4v)
+
+	      i = -1
+	      while(++i < l) {
+	        pos[i] += dt * (k1p[i] + 2 * k2p[i] + 2 * k3p[i] + k4p[i]) / 6
+	        vel[i] += dt * (k1v[i] + 2 * k2v[i] + 2 * k3v[i] + k4v[i]) / 6
+	      }
+
+			}
+
+		}
+			
+		var state = {
+			len: 2, 
+			pos: [0, 0, 0, 260], 
+			vel: [0, 0, 100, 0], 
+			
+			mas: [50, 0], 
+			size: [60, 10],
+			old: [0, 0, 0, 260]
+		}
+
+		var solve = (p, v, a) => {
+
+			
+			for(var i = 0; i<state.len; i++) {
+				var x1 = p[i * 2]
+				var y1 = p[i * 2 + 1]
+				var m1 = state.mas[i]
+
+				//Check me against all others
+				for(var j = 0; j<state.len; j++) {
+
+					if(i != j) {					
+						var x2 = p[j * 2]
+						var y2 = p[j * 2 + 1]
+						var m2 = state.mas[j]
+
+						var dx = x2 - x1
+						var dy = y2 - y1
+						var d = Math.sqrt(dx * dx + dy * dy)
+						var f = (m2 / d)
+
+						a[i * 2] += dx * f
+						a[i * 2 + 1] += dy * f
+
+					}
+				}
+
+			}
+
+		}
+
+
+		var integrate = rk4(state, solve)
+
+		var update = (delta) => {
+			state.old = state.pos.concat()
+			integrate(delta)
+		}
+
+  	var canvas = document.createElement("canvas");
+  	var context = canvas.getContext("2d");
+  	document.body.appendChild(canvas);
+
+		var render = function(leap) {
+	    canvas.width = document.documentElement.clientWidth
+	    canvas.height = document.documentElement.clientHeight
+	    context.translate(canvas.width * 0.5, canvas.height * 0.5)
+
+			for(var i = 0; i<state.len; i++) {
+
+				var xi = i * 2
+				var yi = i * 2 + 1
+				var x = lerp.float(state.old[xi], state.pos[xi], leap)
+				var y = lerp.float(state.old[yi], state.pos[yi], leap)
+				var r = state.size[i]
+
+
+				if(i == 0) {
+					context.translate(-x, -y)
+				}
+
+				context.beginPath();
+				context.arc(x, y, r, 0, 2 * Math.PI);			  
+			  context.fillStyle = 'black'
+				context.fill()
+
+			}
+
+		}
+
+		var scope = animate.scope(1)
+
+		scope.fixed(null, update, render)
+
+	</script>
+
+	
+
+</body>
+</html>
