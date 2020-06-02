@@ -16,7 +16,7 @@
 <body>
 
 	<script type="module">
-  	import animate, {lerp} from '../src/animate.js'
+  	import animate, {blend} from '../index.js'
 	
 		var rk4 = function(state, evaluate) {
 
@@ -147,8 +147,8 @@
 
 				var xi = i * 2
 				var yi = i * 2 + 1
-				var x = lerp.float(state.old[xi], state.pos[xi], leap)
-				var y = lerp.float(state.old[yi], state.pos[yi], leap)
+				var x = blend.float(state.old[xi], state.pos[xi], leap)
+				var y = blend.float(state.old[yi], state.pos[yi], leap)
 				var r = state.size[i]
 
 

@@ -1,13 +1,13 @@
-const enqueue = (function(window) {
+var enqueue = (function(window) {
 
-  const timestamp = window.performance ? function(){ return window.performance.now() } : function() { return new Date().getTime() }
-  const requestFrame = window.requestAnimationFrame || function(callback) { setTimeout(callback, 16) }
+  var timestamp = window.performance ? function(){ return window.performance.now() } : function() { return new Date().getTime() }
+  var requestFrame = window.requestAnimationFrame || function(callback) { setTimeout(callback, 16) }
 
   var queue = []
   var active = false
   var time = 0
 
-  const enterFrame = () => {
+  var enterFrame = () => {
     var now = timestamp()
     var delta = (now - time) / 1000
     time = now
@@ -36,16 +36,16 @@ const enqueue = (function(window) {
 })(typeof window !== "undefined" ? window : {})
 
 
-const scope = (scale) => {
+var scope = (scale) => {
 
 	var revision = 0
 
-	const context = {
+	var context = {
 		pause: false,
 		scale: isNaN(scale) ? 1 : scale
 	}
 
-	const until = solve => new Promise((resolve, reject) => {
+	var until = solve => new Promise((resolve, reject) => {
 		var instance = revision
     enqueue(delta => {
     	if(instance < revision) { 
@@ -76,17 +76,17 @@ const scope = (scale) => {
 	}
 
 
-	context.tween = (options, interp) => {
+	context.tween = (options, mixer) => {
 		var curve = options && options.curve
 		var duration = options && options.duration || 0
 		var position = 0
 		return until(delta => {
 			position += delta
 			if(position < duration) {
-				interp(curve ? curve(position / duration) : position / duration)
+				mixer(curve ? curve(position / duration) : position / duration)
 				return false
 			}
-			interp(curve ? curve(1) : 1)
+			mixer(curve ? curve(1) : 1)
 			return true
 		})
 	}
@@ -111,7 +111,4 @@ const scope = (scale) => {
 	return context
 }
 
-
 export default scope()
-export * as curve from './curve.js'
-export * as lerp from './lerp.js'

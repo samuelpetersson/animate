@@ -9,75 +9,101 @@
 				margin: 0;
 				background: #FFF;
 			}
-			div {
-				background: #f09;
+			
+			.bar {
 				height: 25%;
+				padding: 5%;
+				box-sizing: border-box;
+			}
+	
+	
+			.bar-title {
+				font-size: 20px;
+				text-transform: uppercase;
+				font-family: sans-serif;
+				color: #111;
+			}
+			.bar-fill {
+				background: #111;
 				width: 0;
+				height: 50%;
 			}
 
 	</style>
 </head>
 <body>
 	
-	<div id="bar1"></div>
-	<div id="bar2"></div>
-	<div id="bar3"></div>	
-	<div id="bar4"></div>	
+
+	<div class="bar">
+		<div class="bar-title">linear</div>
+		<div class="bar-fill" id="fill1"></div>
+	</div>
+
+
+	<div class="bar">
+		<div class="bar-title">smoothstep</div>
+		<div class="bar-fill" id="fill2"></div>
+	</div>
+
+	<div class="bar">
+		<div class="bar-title">smootherstep</div>
+		<div class="bar-fill" id="fill3"></div>
+	</div>
+
+	<div class="bar">
+		<div class="bar-title">powerInOut 3</div>
+		<div class="bar-fill" id="fill4"></div>
+	</div>
+
+
 	
 	<script type="module">
-  	import animate, {curve, lerp} from '../src/animate.js'
+  	import animate, {curve, blend} from '../main.js'
 	
-		var bar1 = document.getElementById('bar1')
-		var bar2 = document.getElementById('bar2')
-		var bar3 = document.getElementById('bar3')
-		var bar4 = document.getElementById('bar4')
-
-
-
-		var interpWidth = function(el, begin, end) {
-			return function(f) {
-				el.style.width = lerp.float(begin, end, f) + '%'
-			}
-		}
-
+		var fill1 = document.getElementById('fill1')
+		var fill2 = document.getElementById('fill2')
+		var fill3 = document.getElementById('fill3')
+		var fill4 = document.getElementById('fill4')
 
 		var fill = function() {
 
 			//Create a new animate scope to slow down tween duration
-			var scope = animate.scope()
+			var {delay, tween, every} = animate.scope(0.5)
 
-			return scope.every([
+
+			return delay(0.5).then(() => every([
 
 				//Linear
-				scope.tween({duration: 1}, interpWidth(bar1, 0, 100)),
+				tween({duration: 1}, blend.style(fill1, {width:'100%'})),
 				
 				//Smoothstep
-				scope.tween({duration: 1, curve:curve.smoothstep}, interpWidth(bar2, 0, 100)),
+				tween({duration: 1, curve:curve.smoothstep}, blend.style(fill2, {width:'100%'})),
 
 				//Smootherstep
-				scope.tween({duration: 1, curve:curve.smootherstep}, interpWidth(bar3, 0, 100)),
+				tween({duration: 1, curve:curve.smootherstep}, blend.style(fill3, {width:'100%'})),
 
 				//Power 3
-				scope.tween({duration: 1, curve:curve.powerInOut(3)}, interpWidth(bar4, 0, 100)),
+				tween({duration: 1, curve:curve.powerInOut(3)}, blend.style(fill4, {width:'100%'})),
 
-			])
+			]))
 
 		}
 
 
 		var reset = function() {
 
-			bar1.style.width = 0
-			bar2.style.width = 0
-			bar3.style.width = 0
-			bar4.style.width = 0
-			document.body.style.backgroundColor = '#f09'
+			return animate.tween({duration: 3}, blend.style(document.body, {backgroundColor:'#111111'}))
 
-			return animate.tween({duration: 2}, (f) => {
-				document.body.style.backgroundColor = '#' + lerp.color(0xff0099, 0xffffff, f).toString(16)
-			})
-			
+				.then(() => {
+					
+					fill1.style.width = 0
+					fill2.style.width = 0
+					fill3.style.width = 0
+					fill4.style.width = 0
 
+				 	return animate.tween({duration: 1}, blend.style(document.body, {backgroundColor:'#ffffff'}))
+
+				})
 		}
 
 
@@ -86,8 +112,6 @@
 		}
 
 		loop()
-
-
 
 	</script>
 
