@@ -2,7 +2,7 @@
 
 Animate async functions in controllable scopes. 
 
-Examples: [tween](https://samuelpetersson.github.io/animate/examples/tween.html), [fixed](https://samuelpetersson.github.io/animate/examples/fixed.html)
+[Examples](https://samuelpetersson.github.io/animate)
 
 
 ## Install

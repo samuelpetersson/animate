@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8">
+	<title>Animate</title>
+	<link rel="stylesheet" href="http://samuelpetersson.github.io/style.css">	
+
+
+	<style>
+		.demo {
+	  	width: 100%;
+	  	height: 200px;
+	  	position: relative;
+	  	background: #eee;
+	  	overflow: hidden;
+		}
+		.demo-ball {
+  		background: #000000;
+  		width: 40px;
+  		height: 40px;
+  		border-radius: 20px;
+  		position: absolute;
+  		margin-left: -20px;
+  		margin-top: -20px;
+  		left: 50%;
+  		top: 50%;
+		}
+	</style>
+</head>
+<body>
+	
+	<main>
+	
+		<header>
+			<h1>Animate</h1>
+			<p>
+				<a href="https://github.com/samuelpetersson/animate">Source</a>
+			</p>
+		</header>
+
+	
+		<article>
+			<p>Interpolate values over time with a specified curve.</p>
+
+			<div class="demo">
+				<div class="demo-ball" id="demo-tween--ball"></div>
+			</div>
+
+			<script type="module">
+				import animate, {blend, curve} from './main.js'
+
+				var ball = document.getElementById('demo-tween--ball')
+
+
+				var animateBall = function() {
+
+					var {tween} = animate.scope()
+					
+					return tween({duration: 2, curve: curve.smootherstep}, (f) => {
+						ball.style.borderRadius = blend.float(20, 0, f) + 'px'
+						ball.style.transform = `scale(${blend.float(1, 4, f)}) rotate(${blend.float(0, 180, f)}deg)`
+						ball.style.background = '#' + blend.color(0x100000, 0x11abdd, f).toString(16)
+					})
+					.then(() => tween({duration: 0.8, curve: curve.smootherstep}, (f) => {
+						ball.style.transform = `scale(4, ${blend.float(4, 1, f)}) rotate(180deg)`
+					}))
+					.then(() => tween({duration: 0.5, curve: curve.smootherstep}, (f) => {
+						ball.style.transform = `scale(${blend.float(4, 1, f)}, 1) rotate(180deg)`
+					}))
+					.then(() => tween({duration: 1.5, curve: curve.smootherstep}, (f) => {
+						ball.style.transform = `rotate(${blend.float(180, 0, f)}deg)`
+						ball.style.borderRadius = blend.float(0, 20, f) + 'px'
+						ball.style.background = '#' + blend.color(0x11abdd, 0x100000, f).toString(16)
+					}))
+
+				}
+
+				var loop = function() {
+					animateBall()
+					.then(() => animate.delay(1))
+					.then(loop)
+				}
+
+				loop()
+
+
+			</script>
+		</article>
+
+
+		<article>
+			<p>Integrate using fixed delta time and render with progress of the last time step.</p>
+
+			<canvas class="demo"  id="demo-fixed--canvas">
+			</canvas>
+
+
+			<script type="module">
+		  	import animate, {blend} from './main.js'
+			
+				var rk4 = function(state, evaluate) {
+
+			    var ktp = [], ktv = []
+			    var k1p = [], k1v = []
+			    var k2p = [], k2v = []
+			    var k3p = [], k3v = []
+			    var k4p = [], k4v = []
+
+
+					return function(dt) {
+							
+						var pos = state.pos
+						var vel = state.vel
+
+			      var i, l = vel.length
+
+			      i = -1
+			      while(++i < l) {
+			        k1p[i] = vel[i]
+			        k1v[i] = 0
+			      }
+
+			      evaluate(pos, vel, k1v)
+			      
+			      i = -1
+			      while(++i < l) {
+			        ktp[i] = pos[i] + k1p[i] * dt * 0.5
+			        ktv[i] = vel[i] + k1v[i] * dt * 0.5
+			        
+			        k2p[i] = ktv[i]
+			        k2v[i] = 0
+			      }
+
+			      evaluate(ktp, ktv, k2v)
+			      
+			      i = -1
+			      while(++i < l) {
+			        ktp[i] = pos[i] + k2p[i] * dt * 0.5
+			        ktv[i] = vel[i] + k2v[i] * dt * 0.5
+
+			        k3p[i] = ktv[i]
+			        k3v[i] = 0
+			      }
+
+			      evaluate(ktp, ktv, k3v)
+			      
+			      i = -1
+			      while(++i < l) {
+			        ktp[i] = pos[i] + k3p[i] * dt
+			        ktv[i] = vel[i] + k3v[i] * dt
+
+			        k4p[i] = ktv[i]
+			        k4v[i] = 0
+			      }
+
+			      evaluate(ktp, ktv, k4v)
+
+			      i = -1
+			      while(++i < l) {
+			        pos[i] += dt * (k1p[i] + 2 * k2p[i] + 2 * k3p[i] + k4p[i]) / 6
+			        vel[i] += dt * (k1v[i] + 2 * k2v[i] + 2 * k3v[i] + k4v[i]) / 6
+			      }
+
+					}
+
+				}
+					
+				var state = {
+					len: 2, 
+					pos: [0, 0, 0, 260], 
+					vel: [0, 0, 100, 0], 
+					
+					mas: [50, 0], 
+					size: [60, 10],
+					old: [0, 0, 0, 260]
+				}
+
+				var solve = (p, v, a) => {
+
+					
+					for(var i = 0; i<state.len; i++) {
+						var x1 = p[i * 2]
+						var y1 = p[i * 2 + 1]
+						var m1 = state.mas[i]
+
+						//Check me against all others
+						for(var j = 0; j<state.len; j++) {
+
+							if(i != j) {					
+								var x2 = p[j * 2]
+								var y2 = p[j * 2 + 1]
+								var m2 = state.mas[j]
+
+								var dx = x2 - x1
+								var dy = y2 - y1
+								var d = Math.sqrt(dx * dx + dy * dy)
+								var f = (m2 / d)
+
+								a[i * 2] += dx * f
+								a[i * 2 + 1] += dy * f
+
+							}
+						}
+
+					}
+
+				}
+
+
+				var integrate = rk4(state, solve)
+
+				var update = (delta) => {
+					state.old = state.pos.concat()
+					integrate(delta)
+				}
+
+		  	var canvas = document.getElementById("demo-fixed--canvas");
+		  	var context = canvas.getContext("2d");
+
+				var render = function(leap) {
+			    canvas.width = canvas.clientWidth
+			    canvas.height = canvas.clientHeight
+			    context.translate(canvas.width * 0.5, canvas.height * 0.5)
+			    context.scale(0.25, 0.25)
+
+					for(var i = 0; i<state.len; i++) {
+
+						var xi = i * 2
+						var yi = i * 2 + 1
+						var x = blend.float(state.old[xi], state.pos[xi], leap)
+						var y = blend.float(state.old[yi], state.pos[yi], leap)
+						var r = state.size[i]
+
+
+						if(i == 0) {
+							context.translate(-x, -y)
+						}
+
+						context.beginPath();
+						context.arc(x, y, r, 0, 2 * Math.PI);			  
+					  context.fillStyle = 'black'
+						context.fill()
+					}
+
+				}
+
+				var scope = animate.scope(1)
+
+				scope.fixed(null, update, render)
+
+			</script>
+			
+		</article>
+
+	</main>
+
+</body>
+</html>

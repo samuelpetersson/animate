@@ -17,6 +17,16 @@ var angle = function(a, b, t) {
 
 var mixer = function(target, values, create) {
 		
+	if(!create) {
+		create = function(name) {
+			var from = target[name]
+			var into = values[name]
+			return function(t) { 
+				target[name] = float(from, into, t)
+			}
+		}
+	}
+
 	var items = {}
 	var initialized = false
 
@@ -45,8 +55,6 @@ var style = function(element, values) {
 	var hex = /^#([0-9a-fA-f]{6})/
 	var rgb = /^rgba?\((\d+),\s*(\d+),\s*(\d+)/
 
-	var source = window.getComputedStyle(element)
-
 	var parse = function(value) {
 
 		var match
@@ -63,12 +71,14 @@ var style = function(element, values) {
 			return {value: (match[1] << 16) | (match[2] << 8) | match[3], unit: '#'}
 		}
 
+		//TODO: Add support for more special cases (transform, rgba, etc.)
+
 		return {value: 0, unit: ''}
 	}
 
 	return mixer(element, values, (name) => {
 
-		var from = parse(source[name])
+		var from = parse(element.style[name])
 		var into = parse(values[name])
 		var unit = into.unit || from.unit
 
