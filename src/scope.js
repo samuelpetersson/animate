@@ -1,37 +1,37 @@
 var enqueue = (function(window) {
 
-  var timestamp = window.performance ? function(){ return window.performance.now() } : function() { return new Date().getTime() }
-  var requestFrame = window.requestAnimationFrame || function(callback) { setTimeout(callback, 16) }
+	var timestamp = window.performance ? function(){ return window.performance.now() } : function() { return new Date().getTime() }
+	var requestFrame = window.requestAnimationFrame || function(callback) { setTimeout(callback, 16) }
 
-  var queue = []
-  var active = false
-  var time = 0
+	var queue = []
+	var active = false
+	var time = 0
 
-  var enterFrame = () => {
-    var now = timestamp()
-    var delta = (now - time) / 1000
-    time = now
-    var i = 0, length = queue.length
-    while(i < length) {
-      if(queue[i++](delta)) {
-        queue.splice(--i, 1)
-        length--
-      }
-    }
-    if((active = length > 0)) {
-      requestFrame(enterFrame)
-    }
-  };
+	var enterFrame = () => {
+		var now = timestamp()
+		var delta = (now - time) / 1000
+		time = now
+		var i = 0, length = queue.length
+		while(i < length) {
+			if(queue[i++](delta)) {
+				queue.splice(--i, 1)
+				length--
+			}
+		}
+		if((active = length > 0)) {
+			requestFrame(enterFrame)
+		}
+	};
 
-  return function(item) {
-    queue.push(item)
-    if(!active) {
-      active = true
-      time = timestamp()
-      requestFrame(enterFrame)
-    }
-    return item
-  }
+	return function(item) {
+		queue.push(item)
+		if(!active) {
+			active = true
+			time = timestamp()
+			requestFrame(enterFrame)
+		}
+		return item
+	}
 
 })(typeof window !== "undefined" ? window : {})
 
@@ -47,16 +47,16 @@ var scope = (scale) => {
 
 	var until = solve => new Promise((resolve, reject) => {
 		var instance = revision
-    enqueue(delta => {
-    	if(instance < revision) { 
-    		//TODO: Check if we should reject?
-    		return true 
-    	}
-    	if(!context.pause && solve(delta * context.scale)) {
-    		resolve()
-    		return true
-    	}
-    })
+		enqueue(delta => {
+			if(instance < revision) { 
+				//TODO: Check if we should reject?
+				return true 
+			}
+			if(!context.pause && solve(delta * context.scale)) {
+				resolve()
+				return true
+			}
+		})
 	})
 	
 

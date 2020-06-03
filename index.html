@@ -10,22 +10,22 @@
 
 	<style>
 		.demo {
-	  	width: 100%;
-	  	height: 200px;
-	  	position: relative;
-	  	background: #eee;
-	  	overflow: hidden;
+			width: 100%;
+			height: 200px;
+			position: relative;
+			background: #eee;
+			overflow: hidden;
 		}
 		.demo-ball {
-  		background: #000000;
-  		width: 40px;
-  		height: 40px;
-  		border-radius: 20px;
-  		position: absolute;
-  		margin-left: -20px;
-  		margin-top: -20px;
-  		left: 50%;
-  		top: 50%;
+			background: #000000;
+			width: 40px;
+			height: 40px;
+			border-radius: 20px;
+			position: absolute;
+			margin-left: -20px;
+			margin-top: -20px;
+			left: 50%;
+			top: 50%;
 		}
 	</style>
 </head>
@@ -98,15 +98,15 @@
 
 
 			<script type="module">
-		  	import animate, {blend} from './main.js'
+				import animate, {blend} from './main.js'
 			
 				var rk4 = function(state, evaluate) {
 
-			    var ktp = [], ktv = []
-			    var k1p = [], k1v = []
-			    var k2p = [], k2v = []
-			    var k3p = [], k3v = []
-			    var k4p = [], k4v = []
+					var ktp = [], ktv = []
+					var k1p = [], k1v = []
+					var k2p = [], k2v = []
+					var k3p = [], k3v = []
+					var k4p = [], k4v = []
 
 
 					return function(dt) {
@@ -114,54 +114,54 @@
 						var pos = state.pos
 						var vel = state.vel
 
-			      var i, l = vel.length
+						var i, l = vel.length
 
-			      i = -1
-			      while(++i < l) {
-			        k1p[i] = vel[i]
-			        k1v[i] = 0
-			      }
+						i = -1
+						while(++i < l) {
+							k1p[i] = vel[i]
+							k1v[i] = 0
+						}
 
-			      evaluate(pos, vel, k1v)
-			      
-			      i = -1
-			      while(++i < l) {
-			        ktp[i] = pos[i] + k1p[i] * dt * 0.5
-			        ktv[i] = vel[i] + k1v[i] * dt * 0.5
-			        
-			        k2p[i] = ktv[i]
-			        k2v[i] = 0
-			      }
+						evaluate(pos, vel, k1v)
+						
+						i = -1
+						while(++i < l) {
+							ktp[i] = pos[i] + k1p[i] * dt * 0.5
+							ktv[i] = vel[i] + k1v[i] * dt * 0.5
+							
+							k2p[i] = ktv[i]
+							k2v[i] = 0
+						}
 
-			      evaluate(ktp, ktv, k2v)
-			      
-			      i = -1
-			      while(++i < l) {
-			        ktp[i] = pos[i] + k2p[i] * dt * 0.5
-			        ktv[i] = vel[i] + k2v[i] * dt * 0.5
+						evaluate(ktp, ktv, k2v)
+						
+						i = -1
+						while(++i < l) {
+							ktp[i] = pos[i] + k2p[i] * dt * 0.5
+							ktv[i] = vel[i] + k2v[i] * dt * 0.5
 
-			        k3p[i] = ktv[i]
-			        k3v[i] = 0
-			      }
+							k3p[i] = ktv[i]
+							k3v[i] = 0
+						}
 
-			      evaluate(ktp, ktv, k3v)
-			      
-			      i = -1
-			      while(++i < l) {
-			        ktp[i] = pos[i] + k3p[i] * dt
-			        ktv[i] = vel[i] + k3v[i] * dt
+						evaluate(ktp, ktv, k3v)
+						
+						i = -1
+						while(++i < l) {
+							ktp[i] = pos[i] + k3p[i] * dt
+							ktv[i] = vel[i] + k3v[i] * dt
 
-			        k4p[i] = ktv[i]
-			        k4v[i] = 0
-			      }
+							k4p[i] = ktv[i]
+							k4v[i] = 0
+						}
 
-			      evaluate(ktp, ktv, k4v)
+						evaluate(ktp, ktv, k4v)
 
-			      i = -1
-			      while(++i < l) {
-			        pos[i] += dt * (k1p[i] + 2 * k2p[i] + 2 * k3p[i] + k4p[i]) / 6
-			        vel[i] += dt * (k1v[i] + 2 * k2v[i] + 2 * k3v[i] + k4v[i]) / 6
-			      }
+						i = -1
+						while(++i < l) {
+							pos[i] += dt * (k1p[i] + 2 * k2p[i] + 2 * k3p[i] + k4p[i]) / 6
+							vel[i] += dt * (k1v[i] + 2 * k2v[i] + 2 * k3v[i] + k4v[i]) / 6
+						}
 
 					}
 
@@ -216,14 +216,14 @@
 					integrate(delta)
 				}
 
-		  	var canvas = document.getElementById("demo-fixed--canvas");
-		  	var context = canvas.getContext("2d");
+				var canvas = document.getElementById("demo-fixed--canvas");
+				var context = canvas.getContext("2d");
 
 				var render = function(leap) {
-			    canvas.width = canvas.clientWidth
-			    canvas.height = canvas.clientHeight
-			    context.translate(canvas.width * 0.5, canvas.height * 0.5)
-			    context.scale(0.25, 0.25)
+					canvas.width = canvas.clientWidth
+					canvas.height = canvas.clientHeight
+					context.translate(canvas.width * 0.5, canvas.height * 0.5)
+					context.scale(0.25, 0.25)
 
 					for(var i = 0; i<state.len; i++) {
 
@@ -240,7 +240,7 @@
 
 						context.beginPath();
 						context.arc(x, y, r, 0, 2 * Math.PI);			  
-					  context.fillStyle = 'black'
+						context.fillStyle = 'black'
 						context.fill()
 					}
 

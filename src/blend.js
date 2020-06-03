@@ -8,10 +8,10 @@ var color = function(a, b, t) {
 }
 
 var angle = function(a, b, t) {
-  var d = b - a
-  if(d >  Math.PI) { d -= Math.PI * 2 }
-  if(d < -Math.PI) { d += Math.PI * 2 }
-  return a + d * t
+	var d = b - a
+	if(d >  Math.PI) { d -= Math.PI * 2 }
+	if(d < -Math.PI) { d += Math.PI * 2 }
+	return a + d * t
 }
 
 
